@@ -583,19 +583,34 @@ export default function Landing() {
             </p>
           </div>
           {[
-            { title: 'Patients', items: ['Find a doctor','Home visits','Video consults','Pricing'] },
-            { title: 'Doctors', items: ['Join MediCall','How payouts work','Resources','Verification'] },
-            { title: 'Company', items: ['About','Careers','Press','Contact'] },
+            { title: 'Patients', items: [
+              { label: 'Find a doctor', to: '/dashboard/patient' },
+              { label: 'Home visits', to: '/home-visits' },
+              { label: 'Video consults', to: '/video-consults' },
+              { label: 'Pricing', to: '/pricing' },
+            ]},
+            { title: 'Doctors', items: [
+              { label: 'Join MediCall', to: '/register/doctor' },
+              { label: 'How payouts work', to: '/payouts' },
+              { label: 'Resources', to: '/resources' },
+              { label: 'Verification', to: '/verification' },
+            ]},
+            { title: 'Company', items: [
+              { label: 'About', to: '/about' },
+              { label: 'Careers', to: '/careers' },
+              { label: 'Press', to: '/press' },
+              { label: 'Contact', to: '/contact' },
+            ]},
           ].map(g => (
             <div key={g.title}>
               <div className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#3D5A80' }}>{g.title}</div>
               <ul className="space-y-2.5">
                 {g.items.map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-sm transition-colors"
-                      style={{ color: '#7A9ABB' }}
+                  <li key={item.label}>
+                    <Link to={item.to} className="text-sm transition-colors"
+                      style={{ color: '#7A9ABB', textDecoration: 'none' }}
                       onMouseEnter={e => { e.currentTarget.style.color = '#0052D9'; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = '#7A9ABB'; }}>{item}</a>
+                      onMouseLeave={e => { e.currentTarget.style.color = '#7A9ABB'; }}>{item.label}</Link>
                   </li>
                 ))}
               </ul>
