@@ -104,7 +104,7 @@ export default function TrackingPage() {
 
       {/* Bottom sheet */}
       <div className="absolute bottom-0 inset-x-0 p-4 z-50">
-        <div className="glass ring-glow max-w-2xl mx-auto p-5 animate-slideUp relative overflow-hidden">
+        <div className="glass ring-glow max-w-2xl mx-auto p-4 sm:p-5 animate-slideUp relative overflow-hidden">
           <div className="absolute -top-20 -right-20 w-56 h-56 bg-cyan/10 blur-3xl rounded-full" />
           <div className="flex items-start gap-4 relative">
             <Avatar src={req.doctor.photo} name={req.doctor.name} size="xl" online />
@@ -150,7 +150,7 @@ export default function TrackingPage() {
             </Button>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 text-[11px]">
+          <div className="mt-3 hidden sm:grid grid-cols-3 gap-2 text-[11px]">
             <div className="glass-soft p-2.5">
               <MapPin size={11} className="text-cyan mb-1" />
               <div className="text-mono text-ink">{req.doctor.distanceKm.toFixed(1)}km</div>

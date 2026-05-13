@@ -5,7 +5,7 @@ import {
   ShieldCheck, Star, ChevronLeft, ChevronRight, Zap,
   Heart, Video, CheckCircle2, TrendingUp, Users, Globe2,
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import Button from '../components/ui/Button.jsx';
 import Badge from '../components/ui/Badge.jsx';
@@ -45,6 +45,24 @@ function userHeroPin() {
       </div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
+  });
+}
+
+// Pulsing electric-blue pin for the animated en-route doctor in the hero
+function movingHeroPin(size = 44) {
+  const half = size / 2;
+  const inner = Math.round(size * 0.25);
+  return L.divIcon({
+    className: 'moving-marker',
+    html: `
+      <div style="position:relative;width:${size}px;height:${size}px">
+        <div style="position:absolute;inset:0;border-radius:999px;border:2px solid #0052D9;opacity:0.55;animation:pulseRing 1.3s cubic-bezier(.16,1,.3,1) infinite;"></div>
+        <div style="position:absolute;inset:0;border-radius:999px;border:2px solid #0052D9;opacity:0.3;animation:pulseRing 1.3s cubic-bezier(.16,1,.3,1) infinite;animation-delay:0.65s;"></div>
+        <div style="position:absolute;inset:${inner}px;border-radius:999px;background:#fff;border:2.5px solid #0052D9;box-shadow:0 0 22px rgba(0,82,217,0.85),0 2px 8px rgba(0,0,0,0.12);"></div>
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #0052D9;filter:drop-shadow(0 0 5px rgba(0,82,217,0.7));animation:arrowBounce 0.9s ease-in-out infinite;"></div>
+      </div>`,
+    iconSize: [size, size],
+    iconAnchor: [half, half],
   });
 }
 
@@ -116,6 +134,33 @@ export default function Landing() {
   const heroDoctors = mockDoctors.filter(d => d.status !== 'offline').slice(0, 8);
   const availableDoc = mockDoctors.find(x => x.status === 'available') || mockDoctors[0];
 
+  // ── Hero map: animated demo doctor driving toward patient ─────────────────
+  const demoStart = useRef(availableDoc.coords);
+  const [demoPos, setDemoPos] = useState(availableDoc.coords);
+  useEffect(() => {
+    const dest = PATIENT_LOCATION;
+    const origin = demoStart.current;
+    const id = setInterval(() => {
+      setDemoPos(p => {
+        const dLat = dest.lat - p.lat;
+        const dLng = dest.lng - p.lng;
+        const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+        if (dist < 0.0003) return origin; // loop back to start
+        const ratio = 0.00005 / dist;
+        return { lat: p.lat + dLat * ratio, lng: p.lng + dLng * ratio };
+      });
+    }, 250);
+    return () => clearInterval(id);
+  }, []);
+
+  // Live distance (km) and ETA (min) for the floating card
+  const demoDistKm = (() => {
+    const dlat = (PATIENT_LOCATION.lat - demoPos.lat) * 111;
+    const dlng = (PATIENT_LOCATION.lng - demoPos.lng) * 111 * Math.cos(demoPos.lat * Math.PI / 180);
+    return Math.max(0.1, Math.sqrt(dlat * dlat + dlng * dlng)).toFixed(1);
+  })();
+  const demoEta = Math.max(1, Math.round(availableDoc.etaMinutes * parseFloat(demoDistKm) / availableDoc.distanceKm));
+
   return (
     <div className="relative">
 
@@ -134,8 +179,8 @@ export default function Landing() {
         {/* Two-column layout */}
         <div className="relative z-10 flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_1fr] max-w-none">
 
-          {/* LEFT — copy */}
-          <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 pt-14 pb-12 lg:py-24">
+          {/* LEFT — copy (below map on mobile, left on desktop) */}
+          <div className="order-last lg:order-first flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 pt-10 sm:pt-14 pb-10 lg:py-24">
             <div className="stagger max-w-lg">
 
               {/* Pill badge */}
@@ -207,8 +252,8 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* RIGHT — live map */}
-          <div className="relative h-72 sm:h-96 lg:h-full lg:min-h-screen">
+          {/* RIGHT — live map (top on mobile so it's immediately visible) */}
+          <div className="relative order-first lg:order-last h-[52vw] min-h-[260px] sm:h-[50vh] lg:h-full lg:min-h-screen">
             <div className="absolute inset-0 lg:inset-y-8 lg:rounded-l-3xl overflow-hidden"
               style={{ boxShadow: '0 0 0 1px rgba(0,82,217,0.1), 0 8px 40px rgba(0,82,217,0.08)' }}>
               <MapContainer
@@ -228,9 +273,22 @@ export default function Landing() {
                   maxZoom={20}
                 />
                 <Marker position={[PATIENT_LOCATION.lat, PATIENT_LOCATION.lng]} icon={userHeroPin()} />
-                {heroDoctors.map(d => (
+                {/* Static background doctors (all except the animated one) */}
+                {heroDoctors.filter(d => d.id !== availableDoc.id).map(d => (
                   <Marker key={d.id} position={[d.coords.lat, d.coords.lng]} icon={heroPin(d.status)} />
                 ))}
+                {/* Animated doctor driving to patient */}
+                <Marker position={[demoPos.lat, demoPos.lng]} icon={movingHeroPin()} />
+                {/* Completed trail: start → current position (emerald green) */}
+                <Polyline
+                  positions={[[demoStart.current.lat, demoStart.current.lng], [demoPos.lat, demoPos.lng]]}
+                  pathOptions={{ color: '#059669', weight: 6, opacity: 0.55, lineCap: 'round', lineJoin: 'round' }}
+                />
+                {/* Remaining route: current → patient (electric blue, animated dashes) */}
+                <Polyline
+                  positions={[[demoPos.lat, demoPos.lng], [PATIENT_LOCATION.lat, PATIENT_LOCATION.lng]]}
+                  pathOptions={{ color: '#0052D9', weight: 6, opacity: 1, dashArray: '10 14', lineCap: 'round', className: 'route-line' }}
+                />
                 <MapAutoFit doctors={heroDoctors} user={PATIENT_LOCATION} />
               </MapContainer>
 
@@ -262,10 +320,15 @@ export default function Landing() {
               <div className="flex items-center gap-3 mb-3">
                 <div className="relative">
                   <img src={availableDoc.photo} alt={availableDoc.name} className="w-12 h-12 rounded-full object-cover border-2"
-                    style={{ borderColor: '#059669' }} />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white animate-breathe" />
+                    style={{ borderColor: '#0052D9' }} />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white animate-breathe" style={{ background: '#0052D9' }} />
                 </div>
                 <div className="flex-1 min-w-0">
+                  <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full mb-1"
+                    style={{ background: 'rgba(0,82,217,0.08)', border: '1px solid rgba(0,82,217,0.2)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-breathe" style={{ background: '#0052D9' }} />
+                    <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: '#0052D9' }}>En route</span>
+                  </div>
                   <p className="font-semibold text-sm truncate" style={{ color: '#0B1D35' }}>{availableDoc.name}</p>
                   <p className="text-xs truncate" style={{ color: '#7A9ABB' }}>{availableDoc.specialty}</p>
                 </div>
@@ -274,12 +337,12 @@ export default function Landing() {
                     <Star size={11} className="fill-current" />
                     <span className="text-mono font-semibold">{availableDoc.rating.toFixed(1)}</span>
                   </div>
-                  <p className="text-mono text-xs font-medium mt-0.5" style={{ color: '#059669' }}>{availableDoc.distanceKm.toFixed(1)}km</p>
+                  <p className="text-mono text-xs font-medium mt-0.5" style={{ color: '#0052D9' }}>{demoDistKm} km away</p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center mb-3">
                 {[
-                  { v: `${availableDoc.etaMinutes}min`, l: 'ETA' },
+                  { v: `${demoEta} min`, l: 'ETA' },
                   { v: formatNaira(availableDoc.fee), l: 'Fee' },
                   { v: 'Home', l: 'Mode' },
                 ].map(s => (
