@@ -1,4 +1,4 @@
-import { Heart, Users, Globe2, Stethoscope } from 'lucide-react';
+import { Heart, Users, Globe2, Stethoscope, ShieldCheck } from 'lucide-react';
 
 const VALUES = [
   { icon: Heart, title: 'Patient-first', desc: 'Every decision we make starts with one question: is this better for the patient?' },
@@ -6,8 +6,6 @@ const VALUES = [
   { icon: Globe2, title: 'Built for Africa', desc: 'Designed ground-up for Nigerian healthcare realities, with plans to expand continent-wide.' },
   { icon: Users, title: 'Community', desc: 'We partner with local health workers, clinics, and hospitals to strengthen the system.' },
 ];
-
-import { ShieldCheck } from 'lucide-react';
 
 const TEAM = [
   { name: 'Dr. Amina Bello', role: 'Co-founder & CEO', bg: '#0052D9' },

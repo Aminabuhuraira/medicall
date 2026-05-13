@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Phone, X, ChevronLeft, MapPin, Star, MessageCircle } from 'lucide-react';
 import LiveMap from '../components/map/LiveMap.jsx';
@@ -9,7 +9,8 @@ import Badge from '../components/ui/Badge.jsx';
 import { useRequest } from '../context/RequestContext.jsx';
 import { mockDoctors, PATIENT_LOCATION } from '../data/mockDoctors.js';
 
-const STEP = 0.0008; // degrees per tick toward patient
+const STEP = 0.00008; // degrees per tick (smooth motion)
+const TICK = 200;    // ms between ticks — appears continuous with CSS transition
 
 export default function TrackingPage() {
   const { requestId } = useParams();
@@ -29,8 +30,11 @@ export default function TrackingPage() {
 
   const [docPos, setDocPos] = useState(req.doctor.coords);
   const [eta, setEta] = useState(req.etaMinutes ?? 12);
+  // Remember starting position to draw the completed-trail segment
+  const startPosRef = useRef(req.doctor.coords);
 
-  // Move doctor toward patient every 2s
+  // Move doctor toward patient on every TICK – small steps render as smooth glide
+  // because .moving-marker has CSS `transition: transform 0.22s linear`
   useEffect(() => {
     const id = setInterval(() => {
       setDocPos((p) => {
@@ -45,9 +49,18 @@ export default function TrackingPage() {
         const ratio = STEP / dist;
         return { lat: p.lat + dLat * ratio, lng: p.lng + dLng * ratio };
       });
-    }, 2000);
+    }, TICK);
     return () => clearInterval(id);
   }, [patient.lat, patient.lng]);
+
+  // Journey progress 0 → 1 (for the progress bar)
+  const progress = useMemo(() => {
+    const s = startPosRef.current;
+    const totalD = Math.hypot(patient.lat - s.lat, patient.lng - s.lng);
+    if (totalD === 0) return 1;
+    const remD = Math.hypot(patient.lat - docPos.lat, patient.lng - docPos.lng);
+    return Math.min(1, 1 - remD / totalD);
+  }, [docPos, patient]);
 
   // ETA decrement every 30s
   useEffect(() => {
@@ -73,9 +86,9 @@ export default function TrackingPage() {
         center={center}
         zoom={15}
         user={patient}
-        doctors={[{ ...req.doctor, coords: docPos }]}
+        doctors={[{ ...req.doctor, coords: docPos, moving: !arrived }]}
       >
-        <RouteOverlay from={docPos} to={patient} />
+        <RouteOverlay start={startPosRef.current} current={docPos} destination={patient} />
       </LiveMap>
 
       {/* Top bar */}
@@ -114,11 +127,19 @@ export default function TrackingPage() {
                 )}
               </p>
             </div>
-            <div className="hidden sm:flex flex-col items-end">
+            <div className="flex flex-col items-end shrink-0">
               <div className="text-[10px] uppercase tracking-widest text-ink-dim">ETA</div>
               <div className="text-display text-3xl text-mono text-cyan">{eta}</div>
               <div className="text-[10px] text-ink-muted">min</div>
             </div>
+          </div>
+
+          {/* Journey progress bar */}
+          <div className="mt-3 h-1.5 bg-border rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-cyan to-bio transition-[width] duration-300"
+              style={{ width: `${(progress * 100).toFixed(1)}%` }}
+            />
           </div>
 
           <div className="mt-4 flex items-center gap-2">

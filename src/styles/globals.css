@@ -216,5 +216,42 @@ body::before {
 /* Focus ring */
 *:focus-visible { outline: 2px solid rgba(0,82,217,0.6); outline-offset: 2px; border-radius: 6px; }
 
+/* ── Animated doctor-in-transit tracking ───────────────────────── */
+/* CSS transition on the Leaflet wrapper so marker glides between ticks */
+.moving-marker {
+  transition: transform 0.22s linear !important;
+  will-change: transform;
+}
+/* Rings pulse faster while doctor is moving */
+.doctor-pin.moving .ring {
+  animation: pulseRing 1.3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.doctor-pin.moving .ring.delay { animation-delay: 0.65s; }
+/* Core glows deeper electric-blue while moving */
+.doctor-pin.moving .core {
+  border-color: var(--electric) !important;
+  box-shadow:
+    0 0 0 2px rgba(0, 82, 217, 0.22),
+    0 0 22px rgba(0, 82, 217, 0.88),
+    0 3px 8px rgba(0, 0, 0, 0.18) !important;
+}
+/* Chevron arrow above the pin, bounces to signal direction */
+.doctor-pin .move-arrow {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #0052D9;
+  filter: drop-shadow(0 0 5px rgba(0, 82, 217, 0.65));
+  animation: arrowBounce 0.9s ease-in-out infinite;
+}
+@keyframes arrowBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0);   opacity: 1;   }
+  50%       { transform: translateX(-50%) translateY(-3px); opacity: 0.65; }
+}
+
 /* Hide leaflet default marker shadow gap */
 .leaflet-marker-icon, .leaflet-marker-shadow { background: transparent !important; border: none !important; }

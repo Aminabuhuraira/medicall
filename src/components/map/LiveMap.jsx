@@ -62,7 +62,7 @@ export default function LiveMap({
         <Marker
           key={d.id}
           position={[d.coords.lat, d.coords.lng]}
-          icon={DoctorPin({ status: d.status, selected: selectedId === d.id })}
+          icon={DoctorPin({ status: d.status, selected: selectedId === d.id, moving: !!d.moving })}
           eventHandlers={{ click: () => onSelect && onSelect(d) }}
         />
       ))}

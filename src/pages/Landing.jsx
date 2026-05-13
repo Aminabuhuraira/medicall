@@ -146,14 +146,14 @@ export default function Landing() {
               </div>
 
               <h1 className="font-bold leading-[1.04] tracking-tight">
-                <span className="block text-5xl sm:text-6xl xl:text-7xl" style={{ color: '#0B1D35' }}>A Doctor.</span>
-                <span className="block text-5xl sm:text-6xl xl:text-7xl" style={{
+                <span className="block text-[2.4rem] sm:text-5xl lg:text-6xl xl:text-7xl" style={{ color: '#0B1D35' }}>A Doctor.</span>
+                <span className="block text-[2.4rem] sm:text-5xl lg:text-6xl xl:text-7xl" style={{
                   background: 'linear-gradient(110deg, #0052D9 0%, #2563EB 40%, #059669 80%)',
                   backgroundSize: '200% 100%',
                   WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
                   animation: 'gradientShift 7s ease infinite',
                 }}>At Your Door.</span>
-                <span className="block text-5xl sm:text-6xl xl:text-7xl" style={{ color: '#0B1D35' }}>In Minutes.</span>
+                <span className="block text-[2.4rem] sm:text-5xl lg:text-6xl xl:text-7xl" style={{ color: '#0B1D35' }}>In Minutes.</span>
               </h1>
 
               <p className="mt-6 text-lg leading-relaxed" style={{ color: '#3D5A80' }}>
