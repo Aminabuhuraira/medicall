@@ -179,8 +179,8 @@ export default function Landing() {
         {/* Two-column layout */}
         <div className="relative z-10 flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_1fr] max-w-none">
 
-          {/* LEFT — copy (below map on mobile, left on desktop) */}
-          <div className="order-last lg:order-first flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 pt-10 sm:pt-14 pb-10 lg:py-24">
+          {/* LEFT — copy (above map on mobile, left on desktop) */}
+          <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 pt-10 sm:pt-14 pb-10 lg:py-24">
             <div className="stagger max-w-lg">
 
               {/* Pill badge */}
@@ -252,8 +252,8 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* RIGHT — live map (top on mobile so it's immediately visible) */}
-          <div className="relative order-first lg:order-last h-[52vw] min-h-[260px] sm:h-[50vh] lg:h-full lg:min-h-screen">
+          {/* RIGHT — live map (below copy on mobile, right on desktop) */}
+          <div className="relative h-[62vw] min-h-[280px] sm:h-[55vh] lg:h-full lg:min-h-screen">
             <div className="absolute inset-0 lg:inset-y-8 lg:rounded-l-3xl overflow-hidden"
               style={{ boxShadow: '0 0 0 1px rgba(0,82,217,0.1), 0 8px 40px rgba(0,82,217,0.08)' }}>
               <MapContainer
@@ -315,13 +315,13 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="absolute bottom-10 left-6 right-6 sm:left-auto sm:right-6 sm:w-72 z-[500] rounded-2xl p-4 animate-float"
+            <div className="absolute bottom-2 sm:bottom-10 left-3 right-3 sm:left-auto sm:right-6 sm:w-72 z-[500] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 animate-float"
               style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(24px)', border: '1px solid rgba(0,82,217,0.12)', boxShadow: '0 8px 40px rgba(0,82,217,0.12), 0 2px 8px rgba(0,0,0,0.04)' }}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="relative">
-                  <img src={availableDoc.photo} alt={availableDoc.name} className="w-12 h-12 rounded-full object-cover border-2"
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="relative shrink-0">
+                  <img src={availableDoc.photo} alt={availableDoc.name} className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover border-2"
                     style={{ borderColor: '#0052D9' }} />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white animate-breathe" style={{ background: '#0052D9' }} />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-white animate-breathe" style={{ background: '#0052D9' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full mb-1"
@@ -340,7 +340,8 @@ export default function Landing() {
                   <p className="text-mono text-xs font-medium mt-0.5" style={{ color: '#0052D9' }}>{demoDistKm} km away</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center mb-3">
+              {/* Stats grid — hidden on mobile to save space */}
+              <div className="hidden sm:grid grid-cols-3 gap-2 text-center mb-3">
                 {[
                   { v: `${demoEta} min`, l: 'ETA' },
                   { v: formatNaira(availableDoc.fee), l: 'Fee' },
@@ -353,7 +354,7 @@ export default function Landing() {
                 ))}
               </div>
               <Link to="/register/patient">
-                <button className="btn-press w-full py-2.5 rounded-xl text-sm font-semibold text-white"
+                <button className="btn-press w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg,#0052D9,#2563EB)', boxShadow: '0 4px 16px rgba(0,82,217,0.3)' }}>
                   Request this doctor →
                 </button>
